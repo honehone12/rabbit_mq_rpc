@@ -1,0 +1,4 @@
+github.com/rabbitmq/amqp091-go v1.3.2 h1:zezKg1S58+q/9Ej7DIqFL6TP6NGMyGPb4ykEm4n94cY=
+github.com/rabbitmq/amqp091-go v1.3.2/go.mod h1:ogQDLSOACsLPsIq0NpbtiifNZi2YOz0VTJ0kHRghqbM=
+golang.org/x/exp v0.0.0-20220328175248-053ad81199eb h1:pC9Okm6BVmxEw76PUu0XUbOTQ92JX11hfvqTjAV3qxM=
+golang.org/x/exp v0.0.0-20220328175248-053ad81199eb/go.mod h1:lgLbSvA5ygNOMpwM/9anMpWVlVJ7Z+cHWq/eFuinpGE=
