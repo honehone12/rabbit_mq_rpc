@@ -2,21 +2,24 @@ package rabbitrpc
 
 import "encoding/json"
 
+// req res classification
+
 type MethodCode int
 type StatusCode int
 
 const (
-	MethodNone MethodCode = iota
-	MethodCodeGET
+	MethodCodeGET MethodCode = iota
 	MethodCodePOST
 	MethodCodePUT
 	MethodCodeDelete
 )
 
 const (
-	StatusNone StatusCode = iota
-	StatusOK
+	StatusOK StatusCode = iota
+	StatusError
 )
+
+// general data wrapper
 
 type Envelope struct {
 	Method MethodCode `json:"method"`
@@ -31,9 +34,12 @@ func MakeBin(
 	status StatusCode,
 	dataTypeName string,
 	dataPtr interface{},
-) (binEnvelope []byte, err error) {
+) (binEnvelope []byte, errorJSONMarshaling *Error) {
 	binData, err := json.Marshal(dataPtr)
 	if err != nil {
+		errorJSONMarshaling = &Error{
+			What: err.Error(),
+		}
 		return
 	}
 	envelop := Envelope{
@@ -43,18 +49,55 @@ func MakeBin(
 		Body:     binData,
 	}
 	binEnvelope, err = json.Marshal(envelop)
+	if err != nil {
+		errorJSONMarshaling = &Error{
+			What: err.Error(),
+		}
+	}
 	return
-
 }
 
-func FromBin(bin []byte, dataPtr interface{}) (envelop *Envelope, err error) {
+func FromBin(
+	bin []byte,
+	dataPtr interface{},
+) (envelop *Envelope, errorJSONUnmarshaling *Error) {
 	envelop = &Envelope{}
-	err = json.Unmarshal(bin, envelop)
+	err := json.Unmarshal(bin, envelop)
 	if err != nil {
+		errorJSONUnmarshaling = &Error{
+			What: err.Error(),
+		}
 		return
 	}
 	err = json.Unmarshal(envelop.Body, dataPtr)
+	if err != nil {
+		errorJSONUnmarshaling = &Error{
+			What: err.Error(),
+		}
+	}
 	return
 }
 
+// callback map for convenience of correlation id check
+
 type CallbackPool map[string]func(raws Raws)
+
+// error definitions
+
+type Error struct {
+	What string `json:"what"`
+}
+
+const ErrorTypeName = "Error"
+
+func (err *Error) Error() string {
+	return err.What
+}
+
+var ErrorTypeNotFound *Error = &Error{
+	What: "type name is unknown",
+}
+
+var ErrorMethodCodeInvalid *Error = &Error{
+	What: "method code is invalid",
+}

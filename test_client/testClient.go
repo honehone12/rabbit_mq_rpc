@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"rabbit_mq_rpc/common"
 	rabbitrpc "rabbit_mq_rpc/rabbit_rpc"
+	testcommon "rabbit_mq_rpc/test_common"
 	"time"
 )
 
@@ -46,19 +46,19 @@ loop:
 		case id := <-doneCh:
 			delete(callbackPool, id)
 		default:
-			data := common.TestData{
+			data := testcommon.TestData{
 				Id:        i,
 				User:      "RabbitTaro",
 				CreatedAt: time.Now(),
 			}
 			bin, _ := rabbitrpc.MakeBin(
 				rabbitrpc.MethodCodeGET,
-				rabbitrpc.StatusNone,
+				rabbitrpc.StatusOK,
 				"TestData",
 				&data,
 			)
 
-			corrId := rabbitrpc.GenerateCorrelationID()
+			corrId := client.GenerateCorrelationID()
 			callbackPool[corrId] = func(raws rabbitrpc.Raws) {
 				onResposeReceived(raws)
 				doneCh <- raws.CorrelationId
@@ -68,17 +68,27 @@ loop:
 				CorrelationId: corrId,
 			}
 			i++
-			//time.Sleep(time.Millisecond * 10)
+			time.Sleep(time.Millisecond * 1000)
 		}
 	}
 }
 
 func onResposeReceived(raws rabbitrpc.Raws) {
 	log.Println(raws.CorrelationId)
-	data := common.TestData{}
-	rabbitrpc.FromBin(
+
+	// slice ok!!
+	// data := make([]common.TestData, 0)
+
+	err := rabbitrpc.Error{}
+
+	envelop, _ := rabbitrpc.FromBin(
 		raws.Body,
-		&data,
+		&err,
 	)
-	log.Println(data)
+	log.Printf(
+		"*********response*********\n%v\n%s\n%v\n",
+		envelop.Status,
+		envelop.TypeName,
+		err,
+	)
 }

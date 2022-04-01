@@ -2,8 +2,8 @@ package rabbitrpc
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -172,10 +172,13 @@ func NewRPCServer(
 	return
 }
 
-func GenerateCorrelationID() string {
-	return strconv.FormatInt(
+func (rabbit *RabbitClient) GenerateCorrelationID() string {
+	return fmt.Sprintf(
+		"%s/at%d/%s.to.%s",
+		rabbit.ExchangeName,
 		time.Now().UnixMicro(),
-		10,
+		rabbit.SubscribeRoutingKey,
+		rabbit.PublishRoutingKey,
 	)
 }
 

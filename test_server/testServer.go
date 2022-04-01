@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"rabbit_mq_rpc/common"
 	rabbitrpc "rabbit_mq_rpc/rabbit_rpc"
+	testcommon "rabbit_mq_rpc/test_common"
 )
 
 var server *rabbitrpc.RabbitClient
@@ -33,15 +33,28 @@ func main() {
 }
 
 func onRequestReceived(server *rabbitrpc.RabbitClient, raws rabbitrpc.Raws) {
-	data := common.TestData{}
+	data := testcommon.TestData{}
 	envelop, _ := rabbitrpc.FromBin(raws.Body, &data)
-	log.Printf("pipipi!! %s\n", raws.CorrelationId)
+	log.Printf(
+		"********pipipi!!*******\n%s\n%s\n%d\n",
+		raws.CorrelationId,
+		envelop.TypeName,
+		envelop.Method,
+	)
+
+	// slice ok!!
+	// datas := make([]common.TestData, 10)
+	// for i := 0; i < 10; i++ {
+	// 	datas[i].Id = i
+	// 	datas[i].CreatedAt = time.Now()
+	// 	datas[i].User = data.User
+	// }
 
 	bin, _ := rabbitrpc.MakeBin(
 		envelop.Method,
-		rabbitrpc.StatusOK,
-		envelop.TypeName,
-		&data,
+		rabbitrpc.StatusError,
+		rabbitrpc.ErrorTypeName,
+		rabbitrpc.ErrorTypeNotFound,
 	)
 	server.Publisher.Ch <- rabbitrpc.Raws{
 		Body:          bin,
