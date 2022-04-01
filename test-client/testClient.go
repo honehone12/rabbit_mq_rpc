@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	rabbitrpc "rabbit_mq_rpc/rabbit_rpc"
-	testcommon "rabbit_mq_rpc/test_common"
+	rabbitrpc "rabbit_mq_rpc/rabbit-rpc"
+	testcommon "rabbit_mq_rpc/test-common"
 	"time"
 )
 
