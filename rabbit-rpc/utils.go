@@ -25,8 +25,9 @@ type Envelope struct {
 	Method MethodCode `json:"method"`
 	Status StatusCode `json:"status"`
 
-	TypeName string `json:"type_name"`
-	Body     []byte `json:"body"`
+	FunctionToCall string `json:"function_to_call"`
+	DataTypeName   string `json:"type_name"`
+	Body           []byte `json:"body"`
 }
 
 func MakeBin(
@@ -34,23 +35,23 @@ func MakeBin(
 	status StatusCode,
 	dataTypeName string,
 	dataPtr interface{},
-) (binEnvelope []byte, errorJSONMarshaling *Error) {
+) (binEnvelope []byte, errorJSONMarshaling *RabbitRPCError) {
 	binData, err := json.Marshal(dataPtr)
 	if err != nil {
-		errorJSONMarshaling = &Error{
+		errorJSONMarshaling = &RabbitRPCError{
 			What: err.Error(),
 		}
 		return
 	}
 	envelop := Envelope{
-		Method:   method,
-		Status:   status,
-		TypeName: dataTypeName,
-		Body:     binData,
+		Method:       method,
+		Status:       status,
+		DataTypeName: dataTypeName,
+		Body:         binData,
 	}
 	binEnvelope, err = json.Marshal(envelop)
 	if err != nil {
-		errorJSONMarshaling = &Error{
+		errorJSONMarshaling = &RabbitRPCError{
 			What: err.Error(),
 		}
 	}
@@ -60,18 +61,18 @@ func MakeBin(
 func FromBin(
 	bin []byte,
 	dataPtr interface{},
-) (envelop *Envelope, errorJSONUnmarshaling *Error) {
+) (envelop *Envelope, errorJSONUnmarshaling *RabbitRPCError) {
 	envelop = &Envelope{}
 	err := json.Unmarshal(bin, envelop)
 	if err != nil {
-		errorJSONUnmarshaling = &Error{
+		errorJSONUnmarshaling = &RabbitRPCError{
 			What: err.Error(),
 		}
 		return
 	}
 	err = json.Unmarshal(envelop.Body, dataPtr)
 	if err != nil {
-		errorJSONUnmarshaling = &Error{
+		errorJSONUnmarshaling = &RabbitRPCError{
 			What: err.Error(),
 		}
 	}
@@ -84,20 +85,20 @@ type CallbackPool map[string]func(raws Raws)
 
 // error definitions
 
-type Error struct {
+type RabbitRPCError struct {
 	What string `json:"what"`
 }
 
-const ErrorTypeName = "Error"
+const ErrorTypeName = "RabbitRPCError"
 
-func (err *Error) Error() string {
+func (err *RabbitRPCError) Error() string {
 	return err.What
 }
 
-var ErrorTypeNotFound *Error = &Error{
+var ErrorTypeNotFound *RabbitRPCError = &RabbitRPCError{
 	What: "type name is unknown",
 }
 
-var ErrorMethodCodeInvalid *Error = &Error{
+var ErrorMethodCodeInvalid *RabbitRPCError = &RabbitRPCError{
 	What: "method code is invalid",
 }

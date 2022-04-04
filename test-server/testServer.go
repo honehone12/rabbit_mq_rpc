@@ -38,7 +38,7 @@ func onRequestReceived(server *rabbitrpc.RabbitClient, raws rabbitrpc.Raws) {
 	log.Printf(
 		"********pipipi!!*******\n%s\n%s\n%d\n",
 		raws.CorrelationId,
-		envelop.TypeName,
+		envelop.DataTypeName,
 		envelop.Method,
 	)
 

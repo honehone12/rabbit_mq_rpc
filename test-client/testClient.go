@@ -79,7 +79,7 @@ func onResposeReceived(raws rabbitrpc.Raws) {
 	// slice ok!!
 	// data := make([]common.TestData, 0)
 
-	err := rabbitrpc.Error{}
+	err := rabbitrpc.RabbitRPCError{}
 
 	envelop, _ := rabbitrpc.FromBin(
 		raws.Body,
@@ -88,7 +88,7 @@ func onResposeReceived(raws rabbitrpc.Raws) {
 	log.Printf(
 		"*********response*********\n%v\n%s\n%v\n",
 		envelop.Status,
-		envelop.TypeName,
+		envelop.DataTypeName,
 		err,
 	)
 }
